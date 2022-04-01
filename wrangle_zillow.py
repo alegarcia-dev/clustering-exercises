@@ -122,6 +122,29 @@ def prepare_zillow(df):
     df = get_single_unit_properties(df)
     df = handle_missing_values(df, 0.90, 0.90)
 
+    columns_strategy = {
+        'mean' : [
+            'calculatedfinishedsquarefeet',
+            'finishedsquarefeet12',
+            'structuretaxvaluedollarcnt',
+            'taxvaluedollarcnt',
+            'landtaxvaluedollarcnt',
+            'taxamount'
+        ],
+        'most_frequent' : [
+            'calculatedbathnbr',
+            'fullbathcnt',
+            'regionidcity',
+            'regionidzip',
+            'yearbuilt'
+        ],
+        'median' : [
+            'censustractandblock'
+        ]
+    }
+
+    return impute_missing_values(df, columns_strategy)
+
 ################################################################################
 
 def get_single_unit_properties(df):
