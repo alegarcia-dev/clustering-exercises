@@ -41,7 +41,16 @@ _zillow_db = 'zillow'
 
 _sql = '''
 SELECT
-    *
+    properties_2017.*,
+    logerror,
+    transactiondate,
+    typeconstructiondesc,
+    airconditioningdesc,
+    architecturalstyledesc,
+    buildingclassdesc,
+    propertylandusedesc,
+    storydesc,
+    heatingorsystemdesc
 FROM properties_2017
 JOIN predictions_2017 ON properties_2017.parcelid = predictions_2017.parcelid
     AND predictions_2017.transactiondate LIKE '2017%%'
@@ -119,6 +128,18 @@ def summarize_row_nulls(df):
 ################################################################################
 
 def prepare_zillow(df):
+    columns = [
+        'typeconstructiontypeid',
+        'airconditioningtypeid',
+        'architecturalstyletypeid',
+        'buildingclasstypeid',
+        'propertylandusetypeid',
+        'storytypeid',
+        'heatingorsystemtypeid',
+        'propertylandusetypeid'
+    ]
+    df = df.drop(columns = columns)
+
     df = get_single_unit_properties(df)
     df = handle_missing_values(df, 0.90, 0.90)
 
