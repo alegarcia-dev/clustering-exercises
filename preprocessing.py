@@ -4,17 +4,17 @@
 #
 #       preprocessing.py
 #
-#       Description: This file contains commonly used preparation functions.
+#       Description: This file contains commonly used preprocessing functions.
 #
 #       Variables:
 #
-#           None
+#           scalers
 #
 #       Functions:
 #
 #           split_data(df, stratify, random_seed = 24)
 #           remove_outliers(df, k, col_list)
-#           scale_data(train, validate, test, columns)
+#           scale_data(train, validate, test, columns, strategy)
 #
 #
 ################################################################################
@@ -22,7 +22,15 @@
 import pandas as pd
 
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
+
+################################################################################
+
+scalers = {
+    'MinMaxScaler' : MinMaxScaler,
+    'StandardScaler' : StandardScaler,
+    'RobustScaler' : RobustScaler
+}
 
 ################################################################################
 
@@ -122,7 +130,7 @@ def remove_outliers(df: pd.core.frame.DataFrame, k: float, col_list: list[str]) 
 
 ################################################################################
 
-def scale_data(train: pd.DataFrame, validate: pd.DataFrame, test: pd.DataFrame, columns: list[str]) -> tuple[
+def scale_data(train: pd.DataFrame, validate: pd.DataFrame, test: pd.DataFrame, columns: list[str], strategy: str = 'MinMaxScaler') -> tuple[
     pd.DataFrame,
     pd.DataFrame,
     pd.DataFrame
@@ -140,6 +148,13 @@ def scale_data(train: pd.DataFrame, validate: pd.DataFrame, test: pd.DataFrame, 
 
         test: DataFrame
             The out of sample test dataset for a machine learning problem.
+
+        columns: list[str]
+            A list of the columns that should be scaled.
+
+        strategy: str, default MinMaxScaler
+            The name of the scaler to use when scaling. Possible values are 
+            ('MinMaxScaler', 'StandardScaler', 'RobustScaler').
     
         Returns
         -------
@@ -147,10 +162,12 @@ def scale_data(train: pd.DataFrame, validate: pd.DataFrame, test: pd.DataFrame, 
             columns scaled.
     '''
 
-    scaler = MinMaxScaler()
+    train_scaled, validate_scaled, test_scaled = train.copy(), validate.copy(), test.copy()
+
+    scaler = scalers[strategy]()
     
-    train[columns] = scaler.fit_transform(train[columns])
-    validate[columns] = scaler.transform(validate[columns])
-    test[columns] = scaler.transform(test[columns])
+    train_scaled[columns] = scaler.fit_transform(train[columns])
+    validate_scaled[columns] = scaler.transform(validate[columns])
+    test_scaled[columns] = scaler.transform(test[columns])
     
-    return train, validate, test
+    return train_scaled, validate_scaled, test_scaled
